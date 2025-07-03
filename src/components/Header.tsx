@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare } from "lucide-react";
+import { Phone, MessageSquare, User } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   const navItems = [
     { name: "Home", href: "#home" },
@@ -41,7 +44,7 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Contact Buttons */}
+          {/* Contact & Auth Buttons */}
           <div className="flex items-center space-x-3">
             <Button 
               variant="outline" 
@@ -55,12 +58,25 @@ const Header = () => {
             <Button 
               variant="default" 
               size="sm"
-              className="bg-accent hover:bg-accent-glow transition-colors"
+              className="bg-accent hover:bg-accent-glow transition-colors hidden sm:flex"
               onClick={() => window.open("https://wa.me/2349038379755")}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               WhatsApp
             </Button>
+            
+            {user ? (
+              <Button size="sm" asChild>
+                <Link to={isAdmin ? "/admin" : "/dashboard"} className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{isAdmin ? "Admin" : "Dashboard"}</span>
+                </Link>
+              </Button>
+            ) : (
+              <Button size="sm" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            )}
 
             {/* Mobile Menu Button */}
             <button
