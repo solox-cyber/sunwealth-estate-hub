@@ -9,25 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
-<<<<<<< HEAD
   const { user, signIn, signUp, loading, isAdmin } = useAuth();
-=======
-  const { user, signIn, signUp, loading } = useAuth();
->>>>>>> 983c4d272a3357b1bc45f7d8500adc8da30fca66
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
-<<<<<<< HEAD
 // Redirect if already authenticated
 if (user && !loading) {
   return <Navigate to={isAdmin ? '/AdminDashboard' : '/dashboard'} replace />;
 }
-=======
-  if (user && !loading) {
-    return <Navigate to="/dashboard" replace />;
-  }
->>>>>>> 983c4d272a3357b1bc45f7d8500adc8da30fca66
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
