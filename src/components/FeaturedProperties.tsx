@@ -1,9 +1,75 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Camera, Heart, Home } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Camera, Heart, Home, Bed, Bath, Square } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+
+interface Property {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  property_type: string;
+  bedrooms: number;
+  bathrooms: number;
+  area_sqm: number;
+  location: string;
+  address: string;
+  features: string[];
+  status: string;
+  images: string[];
+  created_at: string;
+}
 
 const FeaturedProperties = () => {
-  const properties = [
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    const { data } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('status', 'available')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (data) {
+      setProperties(data);
+    }
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <section id="properties" className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Featured Properties</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Loading our latest property listings...</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="aspect-video bg-muted animate-pulse" />
+                <CardContent className="p-6">
+                  <div className="h-6 bg-muted rounded animate-pulse mb-4" />
+                  <div className="h-4 bg-muted rounded animate-pulse mb-2" />
+                  <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const mockProperties = [
     {
       id: 1,
       title: "Luxury Penthouse in Ikoyi",
@@ -93,118 +159,125 @@ const FeaturedProperties = () => {
 
         {/* Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property, index) => (
-            <Card 
-              key={property.id} 
-              className="group overflow-hidden hover:shadow-luxury transition-all duration-500 hover:-translate-y-2 bg-gradient-card border-0 animate-scale-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="relative overflow-hidden">
-                {/* Property Image */}
-                <div className="h-64 bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10" />
-                  
-                  {/* Type Badge */}
-                  <div className="absolute top-4 left-4 z-20">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      property.type === 'For Sale' 
-                        ? 'bg-cta text-cta-foreground' 
-                        : 'bg-accent text-accent-foreground'
-                    }`}>
-                      {property.type}
-                    </span>
+          {properties.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <Home className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">No properties available at the moment.</p>
+            </div>
+          ) : (
+            properties.map((property, index) => (
+              <Card 
+                key={property.id} 
+                className="group overflow-hidden hover:shadow-luxury transition-all duration-500 hover:-translate-y-2 bg-gradient-card border-0 animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="relative overflow-hidden">
+                  {/* Property Image */}
+                  <div className="h-64 bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
+                    <img 
+                      src={property.images?.[0] || "/placeholder.svg"} 
+                      alt={property.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10" />
+                    
+                    {/* Type Badge */}
+                    <div className="absolute top-4 left-4 z-20">
+                      <Badge className="bg-secondary text-secondary-foreground">
+                        {property.property_type}
+                      </Badge>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="absolute top-4 right-4 z-20 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <Button size="sm" variant="secondary" className="rounded-full p-2">
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="secondary" className="rounded-full p-2">
+                        <Camera className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-4 right-4 z-20 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Button size="sm" variant="secondary" className="rounded-full p-2">
-                      <Heart className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="secondary" className="rounded-full p-2">
-                      <Camera className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <CardContent className="p-6">
+                    {/* Price */}
+                    <div className="mb-3">
+                      <p className="text-2xl font-bold text-primary">₦{property.price.toLocaleString()}</p>
+                    </div>
 
-                  {/* Placeholder for property image */}
-                  <div className="absolute inset-0 flex items-center justify-center text-white/60">
-                    <Home className="w-16 h-16" />
-                  </div>
+                    {/* Title & Location */}
+                    <div className="mb-4">
+                      <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {property.title}
+                      </h3>
+                      <div className="flex items-center text-muted-foreground">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        <span>{property.location}</span>
+                      </div>
+                    </div>
+
+                    {/* Property Details */}
+                    {(property.bedrooms || property.bathrooms || property.area_sqm) && (
+                      <div className="flex items-center space-x-4 mb-4 text-sm text-muted-foreground">
+                        {property.bedrooms && (
+                          <span className="flex items-center">
+                            <Bed className="w-4 h-4 mr-1" />
+                            <span className="font-semibold text-foreground">{property.bedrooms}</span> bed
+                          </span>
+                        )}
+                        {property.bathrooms && (
+                          <span className="flex items-center">
+                            <Bath className="w-4 h-4 mr-1" />
+                            <span className="font-semibold text-foreground">{property.bathrooms}</span> bath
+                          </span>
+                        )}
+                        {property.area_sqm && (
+                          <span className="flex items-center">
+                            <Square className="w-4 h-4 mr-1" />
+                            <span className="font-semibold text-foreground">{property.area_sqm}</span> sqm
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Features */}
+                    <div className="mb-6">
+                      <div className="flex flex-wrap gap-2">
+                        {property.features?.slice(0, 3).map((feature, idx) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {feature}
+                          </Badge>
+                        ))}
+                        {property.features && property.features.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{property.features.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                      <Button className="flex-1 bg-primary hover:bg-primary-glow">
+                        View Details
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => window.open("https://wa.me/2349038379755?text=I'm interested in " + property.title)}
+                      >
+                        Contact
+                      </Button>
+                    </div>
+                  </CardContent>
                 </div>
-
-                <CardContent className="p-6">
-                  {/* Price */}
-                  <div className="mb-3">
-                    <p className="text-2xl font-bold text-primary">{property.price}</p>
-                  </div>
-
-                  {/* Title & Location */}
-                  <div className="mb-4">
-                    <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {property.title}
-                    </h3>
-                    <div className="flex items-center text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span>{property.location}</span>
-                    </div>
-                  </div>
-
-                  {/* Property Details */}
-                  {(property.beds || property.baths || property.sqft) && (
-                    <div className="flex items-center space-x-4 mb-4 text-sm text-muted-foreground">
-                      {property.beds && (
-                        <span className="flex items-center">
-                          <span className="font-semibold text-foreground">{property.beds}</span> beds
-                        </span>
-                      )}
-                      {property.baths && (
-                        <span className="flex items-center">
-                          <span className="font-semibold text-foreground">{property.baths}</span> baths
-                        </span>
-                      )}
-                      {property.sqft && (
-                        <span className="flex items-center">
-                          <span className="font-semibold text-foreground">{property.sqft}</span> sqft
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Features */}
-                  <div className="mb-6">
-                    <div className="flex flex-wrap gap-2">
-                      {property.features.slice(0, 3).map((feature, idx) => (
-                        <span 
-                          key={idx}
-                          className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                      {property.features.length > 3 && (
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                          +{property.features.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3">
-                    <Button className="flex-1 bg-primary hover:bg-primary-glow">
-                      View Details
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => window.open("https://wa.me/2349038379755?text=I'm interested in " + property.title)}
-                    >
-                      Contact
-                    </Button>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
 
         {/* View All Button */}

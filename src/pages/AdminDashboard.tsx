@@ -21,6 +21,7 @@ import {
   Trash2 
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Upload, X } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -59,6 +60,8 @@ const AdminDashboard = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -104,43 +107,101 @@ const AdminDashboard = () => {
     setLoadingData(false);
   };
 
+  const uploadImages = async (propertyId: string): Promise<string[]> => {
+    const imageUrls: string[] = [];
+    
+    for (const file of selectedImages) {
+      const fileName = `${propertyId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('property-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('property-images')
+        .getPublicUrl(fileName);
+      
+      imageUrls.push(publicUrl);
+    }
+    
+    return imageUrls;
+  };
+
   const handleAddProperty = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    setUploadingImages(true);
     
-    const propertyData = {
-      title: formData.get('title') as string,
-      description: formData.get('description') as string,
-      price: parseFloat(formData.get('price') as string),
-      property_type: formData.get('property_type') as string,
-      bedrooms: parseInt(formData.get('bedrooms') as string) || null,
-      bathrooms: parseInt(formData.get('bathrooms') as string) || null,
-      area_sqm: parseFloat(formData.get('area_sqm') as string) || null,
-      location: formData.get('location') as string,
-      address: formData.get('address') as string,
-      features: (formData.get('features') as string).split(',').map(f => f.trim()).filter(f => f),
-      status: formData.get('status') as string,
-      created_by: user?.id,
-    };
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      const propertyData = {
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        price: parseFloat(formData.get('price') as string),
+        property_type: formData.get('property_type') as string,
+        bedrooms: parseInt(formData.get('bedrooms') as string) || null,
+        bathrooms: parseInt(formData.get('bathrooms') as string) || null,
+        area_sqm: parseFloat(formData.get('area_sqm') as string) || null,
+        location: formData.get('location') as string,
+        address: formData.get('address') as string,
+        features: (formData.get('features') as string).split(',').map(f => f.trim()).filter(f => f),
+        status: formData.get('status') as string,
+        created_by: user?.id,
+      };
 
-    const { error } = await supabase
-      .from('properties')
-      .insert([propertyData]);
+      // Insert property first
+      const { data: propertyResult, error: propertyError } = await supabase
+        .from('properties')
+        .insert([propertyData])
+        .select('id')
+        .single();
 
-    if (error) {
+      if (propertyError) throw propertyError;
+
+      // Upload images if any
+      let imageUrls: string[] = [];
+      if (selectedImages.length > 0) {
+        imageUrls = await uploadImages(propertyResult.id);
+        
+        // Update property with image URLs
+        const { error: updateError } = await supabase
+          .from('properties')
+          .update({ images: imageUrls })
+          .eq('id', propertyResult.id);
+          
+        if (updateError) throw updateError;
+      }
+
+      toast({
+        title: "Property added successfully",
+        description: "The property has been added to the listings.",
+      });
+      
+      setShowAddProperty(false);
+      setSelectedImages([]);
+      fetchAdminData();
+    } catch (error: any) {
       toast({
         title: "Error adding property",
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Property added successfully",
-        description: "The property has been added to the listings.",
-      });
-      setShowAddProperty(false);
-      fetchAdminData();
+    } finally {
+      setUploadingImages(false);
     }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedImages(Array.from(e.target.files));
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const deleteProperty = async (propertyId: string) => {
@@ -354,6 +415,45 @@ const AdminDashboard = () => {
                       <Input id="features" name="features" placeholder="Pool, Gym, Security, Parking" />
                     </div>
                     <div>
+                      <Label htmlFor="images">Property Images</Label>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center w-full">
+                          <label htmlFor="images" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">Click to upload property images</p>
+                            <input
+                              id="images"
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleImageSelect}
+                            />
+                          </label>
+                        </div>
+                        {selectedImages.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {selectedImages.map((file, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Property ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 h-6 w-6 flex items-center justify-center text-xs"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
                       <Label htmlFor="status">Status</Label>
                       <Select name="status" defaultValue="available">
                         <SelectTrigger>
@@ -368,8 +468,13 @@ const AdminDashboard = () => {
                       </Select>
                     </div>
                     <div className="flex gap-2">
-                      <Button type="submit">Add Property</Button>
-                      <Button type="button" variant="outline" onClick={() => setShowAddProperty(false)}>
+                      <Button type="submit" disabled={uploadingImages}>
+                        {uploadingImages ? "Adding Property..." : "Add Property"}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => {
+                        setShowAddProperty(false);
+                        setSelectedImages([]);
+                      }}>
                         Cancel
                       </Button>
                     </div>

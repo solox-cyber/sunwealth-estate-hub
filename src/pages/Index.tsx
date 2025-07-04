@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
+import InstagramFeed from "@/components/InstagramFeed";
 
 const Index = () => {
   return (
@@ -11,6 +12,7 @@ const Index = () => {
       <Hero />
       <FeaturedProperties />
       <About />
+      <InstagramFeed />
       <Contact />
       
       {/* Footer */}
