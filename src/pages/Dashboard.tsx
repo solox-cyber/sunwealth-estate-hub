@@ -281,6 +281,7 @@ const Dashboard = () => {
                       {new Date(user.created_at).toLocaleDateString()}
                     </p>
                   </div>
+<<<<<<< HEAD
                   <div>
   <label className="text-sm font-medium">Role</label>
   <p className="text-sm text-muted-foreground">
@@ -296,6 +297,8 @@ const Dashboard = () => {
     Debug: isAdmin = {isAdmin.toString()}, user.id = {user.id}
   </p>
 </div>
+=======
+>>>>>>> 983c4d272a3357b1bc45f7d8500adc8da30fca66
                 </div>
               </CardContent>
             </Card>
