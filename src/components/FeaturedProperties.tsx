@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Camera, Heart, Home, Bed, Bath, Square } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import PropertyDetailsModal from './PropertyDetailsModal';
+import PropertyImageGallery from './PropertyImageGallery';
 
 interface Property {
   id: string;
@@ -25,10 +29,19 @@ interface Property {
 const FeaturedProperties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+  const [savedProperties, setSavedProperties] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+    if (user) {
+      fetchSavedProperties();
+    }
+  }, [user]);
 
   const fetchProperties = async () => {
     const { data } = await supabase
@@ -42,6 +55,79 @@ const FeaturedProperties = () => {
       setProperties(data);
     }
     setLoading(false);
+  };
+
+  const fetchSavedProperties = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('saved_properties')
+      .select('property_id')
+      .eq('user_id', user.id);
+
+    if (data) {
+      setSavedProperties(new Set(data.map(item => item.property_id)));
+    }
+  };
+
+  const handleSaveProperty = async (propertyId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save properties",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const isSaved = savedProperties.has(propertyId);
+
+    if (isSaved) {
+      // Remove from saved
+      const { error } = await supabase
+        .from('saved_properties')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('property_id', propertyId);
+
+      if (!error) {
+        setSavedProperties(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(propertyId);
+          return newSet;
+        });
+        toast({
+          title: "Property removed",
+          description: "Property removed from your favorites"
+        });
+      }
+    } else {
+      // Add to saved
+      const { error } = await supabase
+        .from('saved_properties')
+        .insert({
+          user_id: user.id,
+          property_id: propertyId
+        });
+
+      if (!error) {
+        setSavedProperties(prev => new Set([...prev, propertyId]));
+        toast({
+          title: "Property saved",
+          description: "Property added to your favorites"
+        });
+      }
+    }
+  };
+
+  const handleViewDetails = (property: Property) => {
+    setSelectedProperty(property);
+    setShowDetails(true);
+  };
+
+  const handleViewGallery = (property: Property) => {
+    setSelectedProperty(property);
+    setShowGallery(true);
   };
 
   if (loading) {
@@ -190,10 +276,26 @@ const FeaturedProperties = () => {
 
                     {/* Action Buttons */}
                     <div className="absolute top-4 right-4 z-20 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button size="sm" variant="secondary" className="rounded-full p-2">
-                        <Heart className="w-4 h-4" />
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="rounded-full p-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSaveProperty(property.id);
+                        }}
+                      >
+                        <Heart className={`w-4 h-4 ${savedProperties.has(property.id) ? 'fill-red-500 text-red-500' : ''}`} />
                       </Button>
-                      <Button size="sm" variant="secondary" className="rounded-full p-2">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="rounded-full p-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewGallery(property);
+                        }}
+                      >
                         <Camera className="w-4 h-4" />
                       </Button>
                     </div>
@@ -262,7 +364,10 @@ const FeaturedProperties = () => {
 
                     {/* Action Buttons */}
                     <div className="flex space-x-3">
-                      <Button className="flex-1 bg-primary hover:bg-primary-glow">
+                      <Button 
+                        className="flex-1 bg-primary hover:bg-primary-glow"
+                        onClick={() => handleViewDetails(property)}
+                      >
                         View Details
                       </Button>
                       <Button 
@@ -286,6 +391,24 @@ const FeaturedProperties = () => {
             View All Properties
           </Button>
         </div>
+
+        {/* Modals */}
+        {selectedProperty && (
+          <PropertyDetailsModal
+            property={selectedProperty}
+            isOpen={showDetails}
+            onClose={() => setShowDetails(false)}
+          />
+        )}
+        
+        {selectedProperty && (
+          <PropertyImageGallery
+            images={selectedProperty.images || []}
+            title={selectedProperty.title}
+            isOpen={showGallery}
+            onClose={() => setShowGallery(false)}
+          />
+        )}
       </div>
     </section>
   );
