@@ -15,11 +15,14 @@ export const useAnalytics = () => {
 
   const trackEvent = async (eventData: Omit<AnalyticsEvent, 'user_id'>) => {
     try {
-      await supabase.from('analytics_events').insert([{
-        ...eventData,
-        user_id: user?.id,
-        created_at: new Date().toISOString()
-      }]);
+      // TODO: Uncomment once analytics_events table is created
+      // await supabase.from('analytics_events').insert([{
+      //   ...eventData,
+      //   user_id: user?.id,
+      //   created_at: new Date().toISOString()
+      // }]);
+      
+      console.log('Analytics event:', eventData.event_type, eventData);
     } catch (error) {
       console.error('Analytics tracking error:', error);
     }

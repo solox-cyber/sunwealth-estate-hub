@@ -327,7 +327,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="properties" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="properties" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               Properties
@@ -339,6 +339,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="ai-tools" className="flex items-center gap-2">
+              <span className="h-4 w-4">🤖</span>
+              AI Tools
             </TabsTrigger>
           </TabsList>
 
@@ -652,6 +656,240 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ai-tools" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">AI Tools & Automation</h2>
+              <Card className="p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">API Status:</span>
+                  <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                    Not Configured
+                  </span>
+                </div>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Property Search Assistant */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Property Search Assistant
+                  </CardTitle>
+                  <CardDescription>
+                    Intelligent chatbot for property search and lead capture
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">Preview Response:</p>
+                    <p className="text-sm italic">
+                      "Hi! I'm your personal property finder. What's your dream home like?"
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled>
+                      Test Chatbot
+                    </Button>
+                    <Button variant="outline" size="sm" disabled>
+                      Configure
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Requires OpenAI API key to activate
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Mortgage Calculator AI */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="h-5 w-5">🏦</span>
+                    Mortgage Calculator AI
+                  </CardTitle>
+                  <CardDescription>
+                    Interactive mortgage calculator with AI guidance
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">Sample Interaction:</p>
+                    <p className="text-sm italic">
+                      "How much home can you afford? Let me help you figure that out!"
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled>
+                      Launch Tool
+                    </Button>
+                    <Button variant="outline" size="sm" disabled>
+                      Settings
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Requires OpenAI API key to activate
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Home Valuation Tool */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="h-5 w-5">🏠</span>
+                    Smart Property Valuation
+                  </CardTitle>
+                  <CardDescription>
+                    AI-powered home valuation and market analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">User Prompt:</p>
+                    <p className="text-sm italic">
+                      "Curious about your home's value? Get an instant estimate!"
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled>
+                      Test Valuation
+                    </Button>
+                    <Button variant="outline" size="sm" disabled>
+                      Customize
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Requires OpenAI API key to activate
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Content Generation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Edit className="h-5 w-5" />
+                    Content Generation
+                  </CardTitle>
+                  <CardDescription>
+                    Auto-generate property descriptions and marketing content
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">Features:</p>
+                    <ul className="text-sm space-y-1">
+                      <li>• Property descriptions</li>
+                      <li>• Social media captions</li>
+                      <li>• Email marketing copy</li>
+                    </ul>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled>
+                      Generate Content
+                    </Button>
+                    <Button variant="outline" size="sm" disabled>
+                      Templates
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Requires OpenAI API key to activate
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* AI Configuration Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="h-5 w-5">⚙️</span>
+                  AI Configuration
+                </CardTitle>
+                <CardDescription>
+                  Configure your OpenAI API key to activate AI features
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="openai-key">OpenAI API Key</Label>
+                    <Input 
+                      id="openai-key" 
+                      type="password" 
+                      placeholder="sk-..." 
+                      disabled
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Your API key will be stored securely in Supabase Edge Function secrets
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-end">
+                    <Button disabled>
+                      Save Configuration
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This will enable all AI features across the platform
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-2">Available AI Models</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                    <div className="p-2 bg-muted rounded">
+                      <strong>GPT-4o Mini</strong><br/>
+                      <span className="text-muted-foreground">Fast & cost-effective</span>
+                    </div>
+                    <div className="p-2 bg-muted rounded">
+                      <strong>GPT-4o</strong><br/>
+                      <span className="text-muted-foreground">Advanced reasoning</span>
+                    </div>
+                    <div className="p-2 bg-muted rounded">
+                      <strong>GPT-4.1-2025</strong><br/>
+                      <span className="text-muted-foreground">Latest flagship</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Performance Metrics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Performance Metrics</CardTitle>
+                <CardDescription>
+                  Track the effectiveness of your AI tools
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-muted-foreground">--</div>
+                    <div className="text-sm text-muted-foreground">Chat Conversations</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-muted-foreground">--</div>
+                    <div className="text-sm text-muted-foreground">Leads Generated</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-muted-foreground">--%</div>
+                    <div className="text-sm text-muted-foreground">Conversion Rate</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-muted-foreground">--</div>
+                    <div className="text-sm text-muted-foreground">Content Generated</div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-4 text-center">
+                  Metrics will populate once AI features are configured and active
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
