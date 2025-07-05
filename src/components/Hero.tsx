@@ -148,7 +148,7 @@ const Hero = () => {
             <Button
               size="lg"
               className="rounded-full bg-accent hover:bg-accent-glow shadow-glow"
-              onClick={() => window.open("https://wa.me/2349038379755")}
+              onClick={() => window.open("https://wa.me/2347055144347")}
             >
               WhatsApp
             </Button>
@@ -156,7 +156,7 @@ const Hero = () => {
               size="lg"
               variant="outline"
               className="rounded-full bg-white/90 backdrop-blur-sm"
-              onClick={() => window.open("tel:+2349038379755")}
+              onClick={() => window.open("tel:+2347055144347")}
             >
               Call Now
             </Button>

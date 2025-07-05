@@ -140,7 +140,7 @@ const PropertyDetailsModal = ({ property, isOpen, onClose }: PropertyDetailsModa
           <div className="flex gap-3 pt-4">
             <Button 
               className="flex-1 bg-primary hover:bg-primary-glow"
-              onClick={() => window.open(`https://wa.me/2349038379755?text=I'm interested in ${property.title} (ID: ${property.id.slice(0, 8)})`)}
+              onClick={() => window.open(`https://wa.me/2347055144347?text=I'm interested in ${property.title} (ID: ${property.id.slice(0, 8)})`)}
             >
               Contact Agent
             </Button>

@@ -74,16 +74,16 @@ const About = () => {
               <Button 
                 size="lg" 
                 className="bg-primary hover:bg-primary-glow"
-                onClick={() => window.open("https://wa.me/2349038379755")}
+                onClick={() => window.open("https://wa.me/2347055144347")}
               >
                 Contact Us Today
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                onClick={() => window.open("tel:+2349038379755")}
+                onClick={() => window.open("tel:+2347055144347")}
               >
-                Call: +234 903 837 9755
+                Call: +234 705 514 4347
               </Button>
             </div>
           </div>

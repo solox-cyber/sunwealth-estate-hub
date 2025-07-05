@@ -50,7 +50,7 @@ const Header = () => {
               variant="outline" 
               size="sm" 
               className="hidden sm:flex items-center space-x-2"
-              onClick={() => window.open("tel:+2349038379755")}
+              onClick={() => window.open("tel:+2347055144347")}
             >
               <Phone className="w-4 h-4" />
               <span>Call Now</span>
@@ -59,7 +59,7 @@ const Header = () => {
               variant="default" 
               size="sm"
               className="bg-accent hover:bg-accent-glow transition-colors hidden sm:flex"
-              onClick={() => window.open("https://wa.me/2349038379755")}
+              onClick={() => window.open("https://wa.me/2347055144347")}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               WhatsApp

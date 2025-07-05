@@ -373,7 +373,7 @@ const FeaturedProperties = () => {
                       <Button 
                         variant="outline" 
                         className="flex-1"
-                        onClick={() => window.open("https://wa.me/2349038379755?text=I'm interested in " + property.title)}
+                        onClick={() => window.open("https://wa.me/2347055144347?text=I'm interested in " + property.title)}
                       >
                         Contact
                       </Button>

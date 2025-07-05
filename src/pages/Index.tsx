@@ -61,7 +61,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm opacity-80">
-                <li>+234 903 837 9755</li>
+                <li>+234 705 514 4347</li>
                 <li>Victoria Island, Lagos</li>
                 <li>@sunwealth_rent.ng</li>
                 <li>@sunwealth_landandacres</li>
@@ -71,7 +71,7 @@ const Index = () => {
 
           {/* Bottom Bar */}
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-sm opacity-80">
-            <p>&copy; 2024 Sunwealth Ltd. All rights reserved. RC: 1739523</p>
+            <p>&copy; 2025 Sunwealth Ltd. All rights reserved. RC: 1739523</p>
           </div>
         </div>
       </footer>

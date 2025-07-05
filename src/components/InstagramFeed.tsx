@@ -134,19 +134,33 @@ const InstagramFeed = () => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-6">
             <button
-              onClick={() => window.open('https://instagram.com/sunwealth_rent.ng', '_blank')}
+              onClick={() => window.open('https://instagram.com/', '_blank')}
               className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground px-6 py-3 rounded-lg hover:shadow-glow transition-all duration-300"
             >
               <Instagram className="h-5 w-5" />
               <span>@sunwealth_rent.ng</span>
             </button>
+            {/* <button
+              onClick={() => window.open('https://instagram.com/sunwealth_rent.ng', '_blank')}
+              className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground px-6 py-3 rounded-lg hover:shadow-glow transition-all duration-300"
+            >
+              <Instagram className="h-5 w-5" />
+              <span>@sunwealth_rent.ng</span>
+            </button> */}
             <button
-              onClick={() => window.open('https://instagram.com/sunwealth_landandacres', '_blank')}
+              onClick={() => window.open('https://instagram.com/', '_blank')}
               className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground px-6 py-3 rounded-lg hover:shadow-glow transition-all duration-300"
             >
               <Instagram className="h-5 w-5" />
               <span>@sunwealth_landandacres</span>
             </button>
+            {/* <button
+              onClick={() => window.open('https://instagram.com/sunwealth_landandacres', '_blank')}
+              className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground px-6 py-3 rounded-lg hover:shadow-glow transition-all duration-300"
+            >
+              <Instagram className="h-5 w-5" />
+              <span>@sunwealth_landandacres</span>
+            </button> */}
           </div>
         </div>
       </div>

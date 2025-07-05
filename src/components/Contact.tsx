@@ -28,7 +28,7 @@ const Contact = () => {
     
     // WhatsApp integration with form data
     const whatsappMessage = `Hi Sunwealth! I'm interested in:\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nProperty Type: ${formData.propertyType}\nBudget: ${formData.budget}\n\nMessage: ${formData.message}`;
-    window.open(`https://wa.me/2349038379755?text=${encodeURIComponent(whatsappMessage)}`);
+    window.open(`https://wa.me/2347055144347?text=${encodeURIComponent(whatsappMessage)}`);
   };
 
   const contactMethods = [
@@ -36,8 +36,8 @@ const Contact = () => {
       icon: Phone,
       title: "Call Us",
       subtitle: "Speak directly with our experts",
-      value: "+234 903 837 9755",
-      action: () => window.open("tel:+2349038379755"),
+      value: "+234 705 514 4347",
+      action: () => window.open("tel:+2347055144347"),
       bgColor: "bg-primary"
     },
     {
@@ -45,7 +45,7 @@ const Contact = () => {
       title: "WhatsApp",
       subtitle: "Quick responses via WhatsApp",
       value: "Chat with us now",
-      action: () => window.open("https://wa.me/2349038379755"),
+      action: () => window.open("https://wa.me/2347055144347"),
       bgColor: "bg-accent"
     },
     {
