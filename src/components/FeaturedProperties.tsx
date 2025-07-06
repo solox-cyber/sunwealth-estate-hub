@@ -387,7 +387,12 @@ const FeaturedProperties = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button size="lg" variant="outline" className="px-8 py-3">
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="px-8 py-3"
+            onClick={() => window.location.href = '/properties'}
+          >
             View All Properties
           </Button>
         </div>

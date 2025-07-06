@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Home, MessageSquare, User, LogOut, Brain, TrendingUp, Target, BarChart3 } from 'lucide-react';
+import { useOpenAI } from '@/hooks/useOpenAI';
 
 interface Property {
   id: string;
@@ -47,6 +48,7 @@ const Dashboard = () => {
     marketTrends: null,
     loadingAI: false
   });
+  const { config: openAIConfig, analyzeProperties } = useOpenAI();
 
   useEffect(() => {
     if (user) {
@@ -309,13 +311,14 @@ const Dashboard = () => {
                       <Button 
                         size="sm" 
                         className="w-full"
+                        disabled={!openAIConfig.isConfigured}
                         onClick={() => {
                           setAiInsights(prev => ({ ...prev, loadingAI: true }));
                           setTimeout(() => setAiInsights(prev => ({ ...prev, loadingAI: false })), 2000);
                         }}
                       >
                         <Brain className="h-4 w-4 mr-2" />
-                        Find Similar Properties
+                        {openAIConfig.isConfigured ? 'Find Similar Properties' : 'Configure AI First'}
                       </Button>
                     </div>
                   )}

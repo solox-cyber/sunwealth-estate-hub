@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
+import { useOpenAI } from '@/hooks/useOpenAI';
 
 interface Property {
   id: string;
@@ -62,6 +63,9 @@ const AdminDashboard = () => {
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const { config: openAIConfig, loading: aiLoading, saveAPIKey } = useOpenAI();
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -205,6 +209,10 @@ const AdminDashboard = () => {
   };
 
   const deleteProperty = async (propertyId: string) => {
+    if (!confirm('Are you sure you want to delete this property?')) {
+      return;
+    }
+
     const { error } = await supabase
       .from('properties')
       .delete()
@@ -222,6 +230,27 @@ const AdminDashboard = () => {
         description: "The property has been removed from listings.",
       });
       fetchAdminData();
+    }
+  };
+
+  const handleEditProperty = (property: Property) => {
+    setEditingProperty(property);
+    setShowAddProperty(true);
+  };
+
+  const handleSaveAPIKey = async () => {
+    if (!apiKeyInput.trim()) {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your OpenAI API key",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const success = await saveAPIKey(apiKeyInput);
+    if (success) {
+      setApiKeyInput('');
     }
   };
 
@@ -519,7 +548,11 @@ const AdminDashboard = () => {
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditProperty(property)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
@@ -659,17 +692,21 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="ai-tools" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">AI Tools & Automation</h2>
-              <Card className="p-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">API Status:</span>
-                  <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                    Not Configured
-                  </span>
-                </div>
-              </Card>
-            </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-2xl font-semibold">AI Tools & Automation</h2>
+                <Card className="p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">API Status:</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      openAIConfig.isConfigured 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {openAIConfig.isConfigured ? 'Configured' : 'Not Configured'}
+                    </span>
+                  </div>
+                </Card>
+              </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Property Search Assistant */}
@@ -691,15 +728,23 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Test Chatbot
                     </Button>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Configure
                     </Button>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Requires OpenAI API key to activate
+                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
                 </CardContent>
               </Card>
@@ -723,15 +768,23 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Launch Tool
                     </Button>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Settings
                     </Button>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Requires OpenAI API key to activate
+                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
                 </CardContent>
               </Card>
@@ -755,15 +808,23 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Test Valuation
                     </Button>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Customize
                     </Button>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Requires OpenAI API key to activate
+                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
                 </CardContent>
               </Card>
@@ -789,15 +850,23 @@ const AdminDashboard = () => {
                     </ul>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Generate Content
                     </Button>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!openAIConfig.isConfigured}
+                    >
                       Templates
                     </Button>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Requires OpenAI API key to activate
+                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
                 </CardContent>
               </Card>
@@ -822,18 +891,23 @@ const AdminDashboard = () => {
                       id="openai-key" 
                       type="password" 
                       placeholder="sk-..." 
-                      disabled
+                      value={apiKeyInput}
+                      onChange={(e) => setApiKeyInput(e.target.value)}
+                      disabled={aiLoading}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Your API key will be stored securely in Supabase Edge Function secrets
+                      Your API key will be validated and you'll need to add it to Supabase Edge Function secrets
                     </p>
                   </div>
                   <div className="flex flex-col justify-end">
-                    <Button disabled>
-                      Save Configuration
+                    <Button 
+                      onClick={handleSaveAPIKey}
+                      disabled={aiLoading || !apiKeyInput.trim()}
+                    >
+                      {aiLoading ? 'Validating...' : 'Validate & Save'}
                     </Button>
                     <p className="text-xs text-muted-foreground mt-1">
-                      This will enable all AI features across the platform
+                      This will validate your key and enable AI features
                     </p>
                   </div>
                 </div>
