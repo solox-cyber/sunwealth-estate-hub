@@ -262,6 +262,10 @@ const AdminDashboard = () => {
     const success = await saveAPIKey(apiKeyInput);
     if (success) {
       setApiKeyInput('');
+      // Refresh the API key status after a short delay
+      setTimeout(() => {
+        checkAPIKeyStatus();
+      }, 2000);
     }
   };
 
@@ -834,407 +838,186 @@ const AdminDashboard = () => {
                 </Card>
               </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Property Search Assistant */}
-              <Card>
+            {!openAIConfig.isConfigured && (
+              <Card className="border-yellow-200 bg-yellow-50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    Property Search Assistant
-                  </CardTitle>
-                  <CardDescription>
-                    Intelligent chatbot for property search and lead capture
+                  <CardTitle className="text-yellow-800">⚠️ AI Features Not Active</CardTitle>
+                  <CardDescription className="text-yellow-700">
+                    Configure your OpenAI API key to activate all AI features below.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">Preview Response:</p>
-                    <p className="text-sm italic">
-                      "Hi! I'm your personal property finder. What's your dream home like?"
-                    </p>
-                  </div>
-                   <div className="flex gap-2">
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured || isGenerating}
-                       onClick={handleTestChatbot}
-                     >
-                       {isGenerating ? 'Testing...' : 'Test Chatbot'}
-                     </Button>
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleConfigureChatbot}
-                     >
-                       Configure
-                     </Button>
-                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
-                  </div>
-                </CardContent>
               </Card>
+            )}
 
-              {/* Mortgage Calculator AI */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="h-5 w-5">🏦</span>
-                    Mortgage Calculator AI
-                  </CardTitle>
-                  <CardDescription>
-                    Interactive mortgage calculator with AI guidance
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">Sample Interaction:</p>
-                    <p className="text-sm italic">
-                      "How much home can you afford? Let me help you figure that out!"
-                    </p>
-                  </div>
-                   <div className="flex gap-2">
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleLaunchMortgageCalculator}
-                     >
-                       Launch Tool
-                     </Button>
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleMortgageSettings}
-                     >
-                       Settings
-                     </Button>
-                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Home Valuation Tool */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="h-5 w-5">🏠</span>
-                    Smart Property Valuation
-                  </CardTitle>
-                  <CardDescription>
-                    AI-powered home valuation and market analysis
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">User Prompt:</p>
-                    <p className="text-sm italic">
-                      "Curious about your home's value? Get an instant estimate!"
-                    </p>
-                  </div>
-                   <div className="flex gap-2">
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured || isGenerating}
-                       onClick={handleTestValuation}
-                     >
-                       {isGenerating ? 'Analyzing...' : 'Test Valuation'}
-                     </Button>
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleCustomizeValuation}
-                     >
-                       Customize
-                     </Button>
-                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Content Generation */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Edit className="h-5 w-5" />
-                    Content Generation
-                  </CardTitle>
-                  <CardDescription>
-                    Auto-generate property descriptions and marketing content
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">Features:</p>
-                    <ul className="text-sm space-y-1">
-                      <li>• Property descriptions</li>
-                      <li>• Social media captions</li>
-                      <li>• Email marketing copy</li>
-                    </ul>
-                  </div>
-                   <div className="flex gap-2">
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleGenerateContent}
-                     >
-                       Generate Content
-                     </Button>
-                     <Button 
-                       variant="outline" 
-                       size="sm" 
-                       disabled={!openAIConfig.isConfigured}
-                       onClick={handleTemplates}
-                     >
-                       Templates
-                     </Button>
-                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* AI Configuration Section */}
+            {/* Property Search Assistant */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="h-5 w-5">⚙️</span>
-                  AI Configuration
+                  <MessageSquare className="h-5 w-5" />
+                  Property Search Assistant
                 </CardTitle>
                 <CardDescription>
-                  Configure your OpenAI API key to activate AI features
+                  Intelligent chatbot for property search and lead capture
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="openai-key">OpenAI API Key</Label>
-                    <Input 
-                      id="openai-key" 
-                      type="password" 
-                      placeholder="sk-..." 
-                      value={apiKeyInput}
-                      onChange={(e) => setApiKeyInput(e.target.value)}
-                      disabled={aiLoading}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Your API key will be validated and you'll need to add it to Supabase Edge Function secrets
-                    </p>
-                  </div>
-                  <div className="flex flex-col justify-end">
-                    <Button 
-                      onClick={handleSaveAPIKey}
-                      disabled={aiLoading || !apiKeyInput.trim()}
-                    >
-                      {aiLoading ? 'Validating...' : 'Validate & Save'}
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      This will validate your key and enable AI features
-                    </p>
-                  </div>
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">Preview Response:</p>
+                  <p className="text-sm italic">
+                    "Hi! I'm your personal property finder. What's your dream home like?"
+                  </p>
                 </div>
-                
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Available AI Models</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                    <div className="p-2 bg-muted rounded">
-                      <strong>GPT-4o Mini</strong><br/>
-                      <span className="text-muted-foreground">Fast & cost-effective</span>
-                    </div>
-                    <div className="p-2 bg-muted rounded">
-                      <strong>GPT-4o</strong><br/>
-                      <span className="text-muted-foreground">Advanced reasoning</span>
-                    </div>
-                    <div className="p-2 bg-muted rounded">
-                      <strong>GPT-4.1-2025</strong><br/>
-                      <span className="text-muted-foreground">Latest flagship</span>
-                    </div>
-                  </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured || isGenerating}
+                     onClick={handleTestChatbot}
+                   >
+                     {isGenerating ? 'Testing...' : 'Test Chatbot'}
+                   </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleConfigureChatbot}
+                   >
+                     Configure
+                   </Button>
+                 </div>
+                <div className="text-xs text-muted-foreground">
+                  {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                 </div>
               </CardContent>
             </Card>
 
-             {/* AI Performance Metrics */}
-             <Card>
-               <CardHeader>
-                 <CardTitle>AI Performance Metrics</CardTitle>
-                 <CardDescription>
-                   Track the effectiveness of your AI tools
-                 </CardDescription>
-               </CardHeader>
-               <CardContent>
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                   <div className="text-center p-4 bg-muted rounded-lg">
-                     <div className="text-2xl font-bold text-muted-foreground">--</div>
-                     <div className="text-sm text-muted-foreground">Chat Conversations</div>
-                   </div>
-                   <div className="text-center p-4 bg-muted rounded-lg">
-                     <div className="text-2xl font-bold text-muted-foreground">--</div>
-                     <div className="text-sm text-muted-foreground">Leads Generated</div>
-                   </div>
-                   <div className="text-center p-4 bg-muted rounded-lg">
-                     <div className="text-2xl font-bold text-muted-foreground">--%</div>
-                     <div className="text-sm text-muted-foreground">Conversion Rate</div>
-                   </div>
-                   <div className="text-center p-4 bg-muted rounded-lg">
-                     <div className="text-2xl font-bold text-muted-foreground">--</div>
-                     <div className="text-sm text-muted-foreground">Content Generated</div>
-                   </div>
-                 </div>
-                 <p className="text-xs text-muted-foreground mt-4 text-center">
-                   Metrics will populate once AI features are configured and active
-                 </p>
-               </CardContent>
-             </Card>
-
-             {/* AI Tool Results Display */}
-             {showChatTest && (
-               <Card>
-                 <CardHeader>
-                   <CardTitle className="flex items-center justify-between">
-                     Chatbot Test Results
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       onClick={() => setShowChatTest(false)}
-                     >
-                       <X className="h-4 w-4" />
-                     </Button>
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent className="space-y-4">
-                   <div className="bg-blue-50 p-3 rounded-lg">
-                     <p className="text-sm font-medium text-blue-900">User Query:</p>
-                     <p className="text-sm text-blue-800">{chatInput}</p>
-                   </div>
-                   <div className="bg-green-50 p-3 rounded-lg">
-                     <p className="text-sm font-medium text-green-900">AI Response:</p>
-                     <p className="text-sm text-green-800 whitespace-pre-wrap">{chatResponse}</p>
-                   </div>
-                 </CardContent>
-               </Card>
-             )}
-
-             {showContentGenerator && (
-               <Card>
-                 <CardHeader>
-                   <CardTitle className="flex items-center justify-between">
-                     Content Generator
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       onClick={() => setShowContentGenerator(false)}
-                     >
-                       <X className="h-4 w-4" />
-                     </Button>
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent className="space-y-4">
-                   <div>
-                     <Label htmlFor="content-prompt">Content Prompt</Label>
-                     <Textarea
-                       id="content-prompt"
-                       placeholder="e.g., Generate a compelling property description"
-                       value={contentPrompt}
-                       onChange={(e) => setContentPrompt(e.target.value)}
-                       rows={3}
-                     />
-                   </div>
-                   <div className="flex gap-2">
-                     <Button 
-                       onClick={handleGenerateSpecificContent}
-                       disabled={isGenerating || !contentPrompt.trim()}
-                     >
-                       {isGenerating ? 'Generating...' : 'Generate Content'}
-                     </Button>
-                   </div>
-                   {generatedContent && (
-                     <div className="bg-muted p-4 rounded-lg">
-                       <p className="text-sm font-medium mb-2">Generated Content:</p>
-                       <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
-                     </div>
-                   )}
-                 </CardContent>
-               </Card>
-             )}
-
-             {showMortgageCalculator && (
-               <Card>
-                 <CardHeader>
-                   <CardTitle className="flex items-center justify-between">
-                     Mortgage Calculator
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       onClick={() => setShowMortgageCalculator(false)}
-                     >
-                       <X className="h-4 w-4" />
-                     </Button>
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent className="space-y-4">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div>
-                       <Label>Loan Amount (₦)</Label>
-                       <Input type="number" placeholder="5,000,000" />
-                     </div>
-                     <div>
-                       <Label>Interest Rate (%)</Label>
-                       <Input type="number" placeholder="15" />
-                     </div>
-                     <div>
-                       <Label>Loan Term (years)</Label>
-                       <Input type="number" placeholder="25" />
-                     </div>
-                     <div>
-                       <Label>Down Payment (₦)</Label>
-                       <Input type="number" placeholder="1,000,000" />
-                     </div>
-                   </div>
-                   <Button variant="outline" className="w-full">
-                     Calculate Monthly Payment
+            {/* Mortgage Calculator AI */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="h-5 w-5">🏦</span>
+                  Mortgage Calculator AI
+                </CardTitle>
+                <CardDescription>
+                  Interactive mortgage calculator with AI guidance
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">Sample Interaction:</p>
+                  <p className="text-sm italic">
+                    "How much home can you afford? Let me help you figure that out!"
+                  </p>
+                </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleLaunchMortgageCalculator}
+                   >
+                     Launch Tool
                    </Button>
-                   <div className="bg-muted p-4 rounded-lg">
-                     <p className="text-sm text-muted-foreground">This is a demo mortgage calculator. Full functionality would include AI-powered recommendations and market insights.</p>
-                   </div>
-                 </CardContent>
-               </Card>
-             )}
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleMortgageSettings}
+                   >
+                     Settings
+                   </Button>
+                 </div>
+                <div className="text-xs text-muted-foreground">
+                  {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
+                </div>
+              </CardContent>
+            </Card>
 
-             {showValuationTool && (
-               <Card>
-                 <CardHeader>
-                   <CardTitle className="flex items-center justify-between">
-                     Property Valuation Analysis
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       onClick={() => setShowValuationTool(false)}
-                     >
-                       <X className="h-4 w-4" />
-                     </Button>
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent className="space-y-4">
-                   <div className="bg-muted p-4 rounded-lg">
-                     <p className="text-sm font-medium mb-2">AI Valuation Analysis:</p>
-                     <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
-                   </div>
-                 </CardContent>
-               </Card>
-             )}
+            {/* Home Valuation Tool */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="h-5 w-5">🏠</span>
+                  Smart Property Valuation
+                </CardTitle>
+                <CardDescription>
+                  AI-powered home valuation and market analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">User Prompt:</p>
+                  <p className="text-sm italic">
+                    "Curious about your home's value? Get an instant estimate!"
+                  </p>
+                </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured || isGenerating}
+                     onClick={handleTestValuation}
+                   >
+                     {isGenerating ? 'Analyzing...' : 'Test Valuation'}
+                   </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleCustomizeValuation}
+                   >
+                     Customize
+                   </Button>
+                 </div>
+                <div className="text-xs text-muted-foreground">
+                  {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Content Generation */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Content Generation
+                </CardTitle>
+                <CardDescription>
+                  Auto-generate property descriptions and marketing content
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">Features:</p>
+                  <ul className="text-sm space-y-1">
+                    <li>• Property descriptions</li>
+                    <li>• Social media captions</li>
+                    <li>• Email marketing copy</li>
+                  </ul>
+                </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleGenerateContent}
+                   >
+                     Generate Content
+                   </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleTemplates}
+                   >
+                     Templates
+                   </Button>
+                 </div>
+                <div className="text-xs text-muted-foreground">
+                  {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
