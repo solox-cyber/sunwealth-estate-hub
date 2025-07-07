@@ -65,7 +65,18 @@ const AdminDashboard = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const { config: openAIConfig, loading: aiLoading, saveAPIKey } = useOpenAI();
+  const { config: openAIConfig, loading: aiLoading, saveAPIKey, generateContent } = useOpenAI();
+  
+  // AI Tools state
+  const [chatInput, setChatInput] = useState('');
+  const [chatResponse, setChatResponse] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [contentPrompt, setContentPrompt] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [showChatTest, setShowChatTest] = useState(false);
+  const [showContentGenerator, setShowContentGenerator] = useState(false);
+  const [showMortgageCalculator, setShowMortgageCalculator] = useState(false);
+  const [showValuationTool, setShowValuationTool] = useState(false);
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -273,6 +284,121 @@ const AdminDashboard = () => {
       });
       fetchAdminData();
     }
+  };
+
+  // AI Tools handlers
+  const handleTestChatbot = async () => {
+    setIsGenerating(true);
+    setChatInput('Looking for a 3 bedroom apartment in Victoria Island');
+    
+    const response = await generateContent(
+      `Act as a property search assistant. A user is asking: "Looking for a 3 bedroom apartment in Victoria Island". 
+      Respond helpfully based on our available properties: ${JSON.stringify(properties.slice(0, 3))}`,
+      { properties: properties.slice(0, 3) }
+    );
+    
+    if (response) {
+      setChatResponse(response);
+      setShowChatTest(true);
+    }
+    setIsGenerating(false);
+  };
+
+  const handleConfigureChatbot = () => {
+    toast({
+      title: "Chatbot Configuration",
+      description: "Configure chatbot responses, personality, and data sources here.",
+    });
+  };
+
+  const handleLaunchMortgageCalculator = () => {
+    setShowMortgageCalculator(true);
+    toast({
+      title: "Mortgage Calculator",
+      description: "Interactive mortgage calculator launched.",
+    });
+  };
+
+  const handleMortgageSettings = () => {
+    toast({
+      title: "Mortgage Settings",
+      description: "Configure interest rates, loan terms, and calculation parameters.",
+    });
+  };
+
+  const handleTestValuation = async () => {
+    if (properties.length === 0) {
+      toast({
+        title: "No Properties",
+        description: "Add some properties first to test the valuation tool.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    const sampleProperty = properties[0];
+    
+    const response = await generateContent(
+      `Provide a property valuation analysis for: ${sampleProperty.title} in ${sampleProperty.location}, 
+      Price: ₦${sampleProperty.price.toLocaleString()}, Type: ${sampleProperty.property_type}, 
+      ${sampleProperty.bedrooms} bed, ${sampleProperty.bathrooms} bath. 
+      Include market comparison, value factors, and investment potential.`,
+      { property: sampleProperty, market_data: properties }
+    );
+    
+    if (response) {
+      setGeneratedContent(response);
+      setShowValuationTool(true);
+    }
+    setIsGenerating(false);
+  };
+
+  const handleCustomizeValuation = () => {
+    toast({
+      title: "Valuation Customization",
+      description: "Customize valuation parameters, market data sources, and analysis criteria.",
+    });
+  };
+
+  const handleGenerateContent = async () => {
+    if (properties.length === 0) {
+      toast({
+        title: "No Properties",
+        description: "Add some properties first to generate content.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setContentPrompt('Generate compelling property description');
+    setShowContentGenerator(true);
+  };
+
+  const handleTemplates = () => {
+    toast({
+      title: "Content Templates",
+      description: "Access pre-built templates for property descriptions, social media posts, and marketing copy.",
+    });
+  };
+
+  const handleGenerateSpecificContent = async () => {
+    if (!contentPrompt.trim()) return;
+    
+    setIsGenerating(true);
+    const sampleProperty = properties[0];
+    
+    const response = await generateContent(
+      `${contentPrompt} for this property: ${sampleProperty.title} in ${sampleProperty.location}, 
+      Price: ₦${sampleProperty.price.toLocaleString()}, Type: ${sampleProperty.property_type}, 
+      Features: ${sampleProperty.features?.join(', ') || 'Modern amenities'}`,
+      { property: sampleProperty }
+    );
+    
+    if (response) {
+      setGeneratedContent(response);
+    }
+    setIsGenerating(false);
   };
 
   if (loading) {
@@ -727,22 +853,24 @@ const AdminDashboard = () => {
                       "Hi! I'm your personal property finder. What's your dream home like?"
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Test Chatbot
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Configure
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured || isGenerating}
+                       onClick={handleTestChatbot}
+                     >
+                       {isGenerating ? 'Testing...' : 'Test Chatbot'}
+                     </Button>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleConfigureChatbot}
+                     >
+                       Configure
+                     </Button>
+                   </div>
                   <div className="text-xs text-muted-foreground">
                     {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
@@ -767,22 +895,24 @@ const AdminDashboard = () => {
                       "How much home can you afford? Let me help you figure that out!"
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Launch Tool
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Settings
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleLaunchMortgageCalculator}
+                     >
+                       Launch Tool
+                     </Button>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleMortgageSettings}
+                     >
+                       Settings
+                     </Button>
+                   </div>
                   <div className="text-xs text-muted-foreground">
                     {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
@@ -807,22 +937,24 @@ const AdminDashboard = () => {
                       "Curious about your home's value? Get an instant estimate!"
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Test Valuation
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Customize
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured || isGenerating}
+                       onClick={handleTestValuation}
+                     >
+                       {isGenerating ? 'Analyzing...' : 'Test Valuation'}
+                     </Button>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleCustomizeValuation}
+                     >
+                       Customize
+                     </Button>
+                   </div>
                   <div className="text-xs text-muted-foreground">
                     {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
@@ -849,22 +981,24 @@ const AdminDashboard = () => {
                       <li>• Email marketing copy</li>
                     </ul>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Generate Content
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={!openAIConfig.isConfigured}
-                    >
-                      Templates
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleGenerateContent}
+                     >
+                       Generate Content
+                     </Button>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       disabled={!openAIConfig.isConfigured}
+                       onClick={handleTemplates}
+                     >
+                       Templates
+                     </Button>
+                   </div>
                   <div className="text-xs text-muted-foreground">
                     {openAIConfig.isConfigured ? 'AI tools are ready to use' : 'Requires OpenAI API key to activate'}
                   </div>
@@ -932,38 +1066,175 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* AI Performance Metrics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Performance Metrics</CardTitle>
-                <CardDescription>
-                  Track the effectiveness of your AI tools
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-muted-foreground">--</div>
-                    <div className="text-sm text-muted-foreground">Chat Conversations</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-muted-foreground">--</div>
-                    <div className="text-sm text-muted-foreground">Leads Generated</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-muted-foreground">--%</div>
-                    <div className="text-sm text-muted-foreground">Conversion Rate</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-muted-foreground">--</div>
-                    <div className="text-sm text-muted-foreground">Content Generated</div>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 text-center">
-                  Metrics will populate once AI features are configured and active
-                </p>
-              </CardContent>
-            </Card>
+             {/* AI Performance Metrics */}
+             <Card>
+               <CardHeader>
+                 <CardTitle>AI Performance Metrics</CardTitle>
+                 <CardDescription>
+                   Track the effectiveness of your AI tools
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                   <div className="text-center p-4 bg-muted rounded-lg">
+                     <div className="text-2xl font-bold text-muted-foreground">--</div>
+                     <div className="text-sm text-muted-foreground">Chat Conversations</div>
+                   </div>
+                   <div className="text-center p-4 bg-muted rounded-lg">
+                     <div className="text-2xl font-bold text-muted-foreground">--</div>
+                     <div className="text-sm text-muted-foreground">Leads Generated</div>
+                   </div>
+                   <div className="text-center p-4 bg-muted rounded-lg">
+                     <div className="text-2xl font-bold text-muted-foreground">--%</div>
+                     <div className="text-sm text-muted-foreground">Conversion Rate</div>
+                   </div>
+                   <div className="text-center p-4 bg-muted rounded-lg">
+                     <div className="text-2xl font-bold text-muted-foreground">--</div>
+                     <div className="text-sm text-muted-foreground">Content Generated</div>
+                   </div>
+                 </div>
+                 <p className="text-xs text-muted-foreground mt-4 text-center">
+                   Metrics will populate once AI features are configured and active
+                 </p>
+               </CardContent>
+             </Card>
+
+             {/* AI Tool Results Display */}
+             {showChatTest && (
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center justify-between">
+                     Chatbot Test Results
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       onClick={() => setShowChatTest(false)}
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                   <div className="bg-blue-50 p-3 rounded-lg">
+                     <p className="text-sm font-medium text-blue-900">User Query:</p>
+                     <p className="text-sm text-blue-800">{chatInput}</p>
+                   </div>
+                   <div className="bg-green-50 p-3 rounded-lg">
+                     <p className="text-sm font-medium text-green-900">AI Response:</p>
+                     <p className="text-sm text-green-800 whitespace-pre-wrap">{chatResponse}</p>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {showContentGenerator && (
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center justify-between">
+                     Content Generator
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       onClick={() => setShowContentGenerator(false)}
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                   <div>
+                     <Label htmlFor="content-prompt">Content Prompt</Label>
+                     <Textarea
+                       id="content-prompt"
+                       placeholder="e.g., Generate a compelling property description"
+                       value={contentPrompt}
+                       onChange={(e) => setContentPrompt(e.target.value)}
+                       rows={3}
+                     />
+                   </div>
+                   <div className="flex gap-2">
+                     <Button 
+                       onClick={handleGenerateSpecificContent}
+                       disabled={isGenerating || !contentPrompt.trim()}
+                     >
+                       {isGenerating ? 'Generating...' : 'Generate Content'}
+                     </Button>
+                   </div>
+                   {generatedContent && (
+                     <div className="bg-muted p-4 rounded-lg">
+                       <p className="text-sm font-medium mb-2">Generated Content:</p>
+                       <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+             )}
+
+             {showMortgageCalculator && (
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center justify-between">
+                     Mortgage Calculator
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       onClick={() => setShowMortgageCalculator(false)}
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <Label>Loan Amount (₦)</Label>
+                       <Input type="number" placeholder="5,000,000" />
+                     </div>
+                     <div>
+                       <Label>Interest Rate (%)</Label>
+                       <Input type="number" placeholder="15" />
+                     </div>
+                     <div>
+                       <Label>Loan Term (years)</Label>
+                       <Input type="number" placeholder="25" />
+                     </div>
+                     <div>
+                       <Label>Down Payment (₦)</Label>
+                       <Input type="number" placeholder="1,000,000" />
+                     </div>
+                   </div>
+                   <Button variant="outline" className="w-full">
+                     Calculate Monthly Payment
+                   </Button>
+                   <div className="bg-muted p-4 rounded-lg">
+                     <p className="text-sm text-muted-foreground">This is a demo mortgage calculator. Full functionality would include AI-powered recommendations and market insights.</p>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {showValuationTool && (
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center justify-between">
+                     Property Valuation Analysis
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       onClick={() => setShowValuationTool(false)}
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                   <div className="bg-muted p-4 rounded-lg">
+                     <p className="text-sm font-medium mb-2">AI Valuation Analysis:</p>
+                     <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
           </TabsContent>
         </Tabs>
       </div>
