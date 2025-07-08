@@ -23,6 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
 import { useOpenAI } from '@/hooks/useOpenAI';
+import { AIPropertySearch } from '@/components/AIPropertySearch';
 
 interface Property {
   id: string;
@@ -73,7 +74,7 @@ const AdminDashboard = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [contentPrompt, setContentPrompt] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
-  const [showChatTest, setShowChatTest] = useState(false);
+  const [showPropertySearch, setShowPropertySearch] = useState(false);
   const [showContentGenerator, setShowContentGenerator] = useState(false);
   const [showMortgageCalculator, setShowMortgageCalculator] = useState(false);
   const [showValuationTool, setShowValuationTool] = useState(false);
@@ -291,21 +292,8 @@ const AdminDashboard = () => {
   };
 
   // AI Tools handlers
-  const handleTestChatbot = async () => {
-    setIsGenerating(true);
-    setChatInput('Looking for a 3 bedroom apartment in Victoria Island');
-    
-    const response = await generateContent(
-      `Act as a property search assistant. A user is asking: "Looking for a 3 bedroom apartment in Victoria Island". 
-      Respond helpfully based on our available properties: ${JSON.stringify(properties.slice(0, 3))}`,
-      { properties: properties.slice(0, 3) }
-    );
-    
-    if (response) {
-      setChatResponse(response);
-      setShowChatTest(true);
-    }
-    setIsGenerating(false);
+  const handleLaunchPropertySearch = () => {
+    setShowPropertySearch(true);
   };
 
   const handleConfigureChatbot = () => {
@@ -869,12 +857,12 @@ const AdminDashboard = () => {
                 </div>
                  <div className="flex gap-2">
                    <Button 
-                     variant="outline" 
+                     variant="default" 
                      size="sm" 
-                     disabled={!openAIConfig.isConfigured || isGenerating}
-                     onClick={handleTestChatbot}
+                     disabled={!openAIConfig.isConfigured}
+                     onClick={handleLaunchPropertySearch}
                    >
-                     {isGenerating ? 'Testing...' : 'Test Chatbot'}
+                     Launch Search Assistant
                    </Button>
                    <Button 
                      variant="outline" 
@@ -1020,6 +1008,16 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* AI Property Search Modal */}
+        {showPropertySearch && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <AIPropertySearch 
+              properties={properties} 
+              onClose={() => setShowPropertySearch(false)} 
+            />
+          </div>
+        )}
       </div>
     </div>
   );
