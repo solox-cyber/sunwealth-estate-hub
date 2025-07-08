@@ -65,7 +65,7 @@ const AdminDashboard = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const { config: openAIConfig, loading: aiLoading, saveAPIKey, generateContent } = useOpenAI();
+  const { config: openAIConfig, loading: aiLoading, saveAPIKey, generateContent, checkAPIKeyStatus } = useOpenAI();
   
   // AI Tools state
   const [chatInput, setChatInput] = useState('');
